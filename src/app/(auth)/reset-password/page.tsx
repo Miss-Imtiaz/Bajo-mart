@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { resetPassword } from "@/actions/password-reset.actions";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
@@ -25,7 +25,9 @@ export default function ResetPasswordPage() {
     }
 
     setLoading(true);
+
     const result = await resetPassword(token, newPassword);
+
     setLoading(false);
 
     if (!result.success) {
@@ -43,7 +45,11 @@ export default function ResetPasswordPage() {
           <p className="text-sm text-danger-600">
             This reset link is missing or invalid. Please request a new one.
           </p>
-          <a href="/forgot-password" className="mt-4 block text-center text-sm text-petrol-600">
+
+          <a
+            href="/forgot-password"
+            className="mt-4 block text-center text-sm text-petrol-600"
+          >
             Request a new link
           </a>
         </div>
@@ -57,12 +63,18 @@ export default function ResetPasswordPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm rounded-card border border-line-200 bg-paper-0 p-8"
       >
-        <h1 className="mb-6 text-2xl font-bold text-ink-900">Set a new password</h1>
+        <h1 className="mb-6 text-2xl font-bold text-ink-900">
+          Set a new password
+        </h1>
 
         <div className="mb-4 flex flex-col gap-1">
-          <label htmlFor="newPassword" className="text-sm text-ink-700">
+          <label
+            htmlFor="newPassword"
+            className="text-sm text-ink-700"
+          >
             New Password
           </label>
+
           <input
             id="newPassword"
             type="password"
@@ -74,9 +86,13 @@ export default function ResetPasswordPage() {
         </div>
 
         <div className="mb-4 flex flex-col gap-1">
-          <label htmlFor="confirmPassword" className="text-sm text-ink-700">
+          <label
+            htmlFor="confirmPassword"
+            className="text-sm text-ink-700"
+          >
             Confirm New Password
           </label>
+
           <input
             id="confirmPassword"
             type="password"
@@ -87,12 +103,28 @@ export default function ResetPasswordPage() {
           />
         </div>
 
-        {error && <p className="mb-4 text-xs text-danger-600">{error}</p>}
+        {error && (
+          <p className="mb-4 text-xs text-danger-600">
+            {error}
+          </p>
+        )}
 
-        <Button type="submit" disabled={loading} className="w-full">
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full"
+        >
           {loading ? "Saving..." : "Set New Password"}
         </Button>
       </form>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
