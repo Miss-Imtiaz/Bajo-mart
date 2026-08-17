@@ -1,6 +1,8 @@
 import { getDailyEntry } from "@/actions/daily-entry.actions";
 import { getVendorsByGroup, getVendorAmountSuggestions } from "@/actions/vendor.actions";
+import { getDailyEntryAuditHistory } from "@/actions/audit.actions";
 import { DailyEntryForm } from "./DailyEntryForm";
+import { AuditHistory } from "./AuditHistory";
 
 export default async function DailyEntryPage({ params }: { params: { date: string } }) {
   const [entry, vendorGroups, suggestions] = await Promise.all([
@@ -8,6 +10,8 @@ export default async function DailyEntryPage({ params }: { params: { date: strin
     getVendorsByGroup(),
     getVendorAmountSuggestions(),
   ]);
+
+  const history = entry ? await getDailyEntryAuditHistory(entry.id) : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -18,6 +22,7 @@ export default async function DailyEntryPage({ params }: { params: { date: strin
         vendorGroups={vendorGroups}
         suggestions={suggestions}
       />
+      {history.length > 0 && <AuditHistory items={history} />}
     </div>
   );
 }

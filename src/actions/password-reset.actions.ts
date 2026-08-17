@@ -5,15 +5,12 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/mailer";
 
-const TOKEN_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
+const TOKEN_EXPIRY_MS = 60 * 60 * 1000;
 
 function hashToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-// Step 1: user enters their email on /forgot-password.
-// Always returns success (even if the email doesn't exist) so a stranger
-// can't use this form to find out which emails are registered.
 export async function requestPasswordReset(email: string): Promise<{ success: true }> {
   const user = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
 
@@ -39,7 +36,6 @@ export interface ResetPasswordResult {
   error?: string;
 }
 
-// Step 2: user clicks the emailed link, lands on /reset-password?token=..., sets a new password.
 export async function resetPassword(token: string, newPassword: string): Promise<ResetPasswordResult> {
   if (newPassword.length < 10) {
     return { success: false, error: "Password must be at least 10 characters." };

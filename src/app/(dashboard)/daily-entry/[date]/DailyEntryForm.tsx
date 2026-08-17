@@ -61,6 +61,9 @@ const emptyFields = {
 
 const emptyGallons = { REGULAR: "", PLUS: "", PREMIUM: "", DIESEL: "" };
 
+// A small toast fixed to the top of the screen — visible immediately without
+// scrolling, regardless of how long the form is. Auto-dismisses after a few
+// seconds so it never blocks the UI.
 function Toast({ message, variant, onDismiss }: { message: string; variant: "success" | "error"; onDismiss: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onDismiss, 4000);
@@ -149,6 +152,10 @@ export function DailyEntryForm({
     setExpenses((e) => ({ ...e, [vendorId]: { ...e[vendorId], [kind]: value } }));
   }
 
+  // Live totals — uses the exact same calculation engine the server uses,
+  // so what you see while typing matches what gets saved. Note: Total Card
+  // and ST/Bal Diff are confirmed MANUAL entries (daily-report-formulas.md)
+  // and are never calculated — they're just regular typed fields below.
   const liveCalc = useMemo(() => {
     const d = (v: string) => new Decimal(v || 0);
     return calculateDailyEntry({
@@ -189,6 +196,8 @@ export function DailyEntryForm({
     }
 
     setToast({ message: "Saved successfully.", variant: "success" });
+    // Clear the form so it's ready for fresh entry — reopening this date
+    // later will still load exactly what was just saved.
     setFields(emptyFields);
     setGallons(emptyGallons);
     setExpenses(buildExpensesFromEntry(null));

@@ -3,19 +3,16 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
-// Very small in-memory login-attempt tracker for rate limiting.
-// NOTE: this resets if the server restarts. Fine for a 2-user internal app on
-// a single server instance.
 const failedAttempts = new Map<string, { count: number; firstAttempt: number; lockedUntil?: number }>();
 
 const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 10 * 60 * 1000; // 10 minutes
-const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
+const WINDOW_MS = 10 * 60 * 1000;
+const LOCKOUT_MS = 15 * 60 * 1000;
 
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60,
   },
   pages: {
     signIn: "/login",

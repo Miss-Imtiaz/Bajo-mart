@@ -1,6 +1,3 @@
-// Run with: npm run reset-password -- --email=owner@bajomart.com --password=NewPassword123!
-// A developer runs this script manually when someone is locked out and email isn't set up yet.
-
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 

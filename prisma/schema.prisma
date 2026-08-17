@@ -1,7 +1,3 @@
-// This file is the single source of truth for the database structure.
-// Field names match the CLIENT-CONFIRMED report (BAJO_MART_MONTHLY_ANNUAL.xlsx).
-// After changing anything here, run: npm run db:migrate
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,9 +8,6 @@ datasource db {
   directUrl = env("DIRECT_DATABASE_URL")
 }
 
-// ─────────────────────────────────────────────
-// Who can log in (Owner, Partner)
-// ─────────────────────────────────────────────
 model User {
   id           String   @id @default(uuid())
   name         String
@@ -29,9 +22,6 @@ model User {
   @@map("users")
 }
 
-// ─────────────────────────────────────────────
-// The reusable vendor/expense master list
-// ─────────────────────────────────────────────
 enum VendorGroup {
   OPERATING
   WHOLESALE
@@ -52,33 +42,26 @@ model Vendor {
   @@map("vendors")
 }
 
-// ─────────────────────────────────────────────
-// One row per calendar day (header/summary data)
-// Field names match the CLIENT-CONFIRMED report exactly.
-// ─────────────────────────────────────────────
 model DailyEntry {
   id        String   @id @default(uuid())
-  entryDate DateTime @unique @map("entry_date") @db.Date // plain DATE, no time/timezone
+  entryDate DateTime @unique @map("entry_date") @db.Date
 
   mopSale Decimal @default(0) @map("mop_sale") @db.Decimal(12, 2)
   eft     Decimal @default(0) @db.Decimal(12, 2)
 
-  // Gas: Sale & Purchase section (day-level totals)
   gasSale    Decimal @default(0) @map("gas_sale") @db.Decimal(12, 2)
   gasInvoice Decimal @default(0) @map("gas_invoice") @db.Decimal(12, 2)
   posFee     Decimal @default(0) @map("pos_fee") @db.Decimal(12, 2)
   creCarFee  Decimal @default(0) @map("cre_car_fee") @db.Decimal(12, 2)
-  totalCard  Decimal @default(0) @map("total_card") @db.Decimal(12, 2) // server-calculated
+  totalCard  Decimal @default(0) @map("total_card") @db.Decimal(12, 2)
   stBalDiff  Decimal @default(0) @map("st_bal_diff") @db.Decimal(12, 2)
 
-  // Lotto section
   lottoTotal          Decimal @default(0) @map("lotto_total") @db.Decimal(12, 2)
   lottoTicketSold     Decimal @default(0) @map("lotto_ticket_sold") @db.Decimal(12, 2)
   lottoCashActivation Decimal @default(0) @map("lotto_cash_activation") @db.Decimal(12, 2)
   lottoCommission     Decimal @default(0) @map("lotto_commission") @db.Decimal(12, 2)
   lottoRent           Decimal @default(0) @map("lotto_rent") @db.Decimal(12, 2)
 
-  // Payment section
   payCreditCard Decimal @default(0) @map("pay_credit_card") @db.Decimal(12, 2)
   payDebitCard  Decimal @default(0) @map("pay_debit_card") @db.Decimal(12, 2)
   payMobil      Decimal @default(0) @map("pay_mobil") @db.Decimal(12, 2)
@@ -86,7 +69,6 @@ model DailyEntry {
   payCashInHand Decimal @default(0) @map("pay_cash_in_hand") @db.Decimal(12, 2)
   payFs         Decimal @default(0) @map("pay_fs") @db.Decimal(12, 2)
 
-  // Store section
   storeSale       Decimal @default(0) @map("store_sale") @db.Decimal(12, 2)
   storeTax        Decimal @default(0) @map("store_tax") @db.Decimal(12, 2)
   storeCigTaxPaid Decimal @default(0) @map("store_cig_tax_paid") @db.Decimal(12, 2)
@@ -94,10 +76,6 @@ model DailyEntry {
   storeEDeposit   Decimal @default(0) @map("store_e_deposit") @db.Decimal(12, 2)
   storeTDeposit   Decimal @default(0) @map("store_t_deposit") @db.Decimal(12, 2)
 
-  // Final totals — server-calculated only. Confirmed simple formulas:
-  //   Total Bank Expense = SUM of all vendor bank amounts that day
-  //   Total Cash Expense = SUM of all vendor cash amounts that day
-  //   Total Expense      = Total Bank Expense + Total Cash Expense
   totalBankExpense Decimal @default(0) @map("total_bank_expense") @db.Decimal(12, 2)
   totalCashExpense Decimal @default(0) @map("total_cash_expense") @db.Decimal(12, 2)
   totalExpense     Decimal @default(0) @map("total_expense") @db.Decimal(12, 2)
@@ -113,9 +91,6 @@ model DailyEntry {
   @@map("daily_entries")
 }
 
-// ─────────────────────────────────────────────
-// Gallons per fuel type within a day
-// ─────────────────────────────────────────────
 enum FuelType {
   REGULAR
   PLUS
@@ -135,10 +110,6 @@ model GasGallons {
   @@map("gas_gallons")
 }
 
-// ─────────────────────────────────────────────
-// Every vendor expense entry for a given day.
-// A vendor can have BOTH a bank amount AND a cash amount on the same day.
-// ─────────────────────────────────────────────
 model DailyExpense {
   id           String     @id @default(uuid())
   dailyEntryId String     @map("daily_entry_id")
@@ -157,9 +128,6 @@ model DailyExpense {
   @@map("daily_expenses")
 }
 
-// ─────────────────────────────────────────────
-// Audit trail for edits to past entries
-// ─────────────────────────────────────────────
 enum AuditAction {
   CREATE
   UPDATE
@@ -182,11 +150,6 @@ model AuditLog {
   @@map("audit_log")
 }
 
-// ─────────────────────────────────────────────
-// Forgot Password — a time-limited, single-use token emailed to the user.
-// The raw token is only ever emailed to the user; the database stores just
-// a hash of it (same principle as passwords — Security Doc Section 3).
-// ─────────────────────────────────────────────
 model PasswordResetToken {
   id        String    @id @default(uuid())
   userId    String    @map("user_id")

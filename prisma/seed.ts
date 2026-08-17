@@ -1,44 +1,25 @@
-// Populates the database with:
-// 1. The 2 users (Owner, Partner) — CHANGE THESE PASSWORDS/EMAILS IMMEDIATELY AFTER FIRST LOGIN
-//    (use the Settings page once logged in, or the reset-password script).
-// 2. The vendor master list — CONFIRMED by the client directly from their real,
-//    in-use monthly report (BAJO_MART_MONTHLY_ANNUAL.xlsx). 42 vendors total, 14 per group.
-//
-// Run with: npm run db:seed
-
 import { PrismaClient, VendorGroup } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // ── 1. Users ──────────────────────────────────────────────
   const ownerPasswordHash = await bcrypt.hash("ChangeMe123!Owner", 10);
   const partnerPasswordHash = await bcrypt.hash("ChangeMe123!Partner", 10);
 
   await prisma.user.upsert({
     where: { email: "owner@bajomart.com" },
     update: {},
-    create: {
-      name: "Owner",
-      email: "owner@bajomart.com",
-      passwordHash: ownerPasswordHash,
-    },
+    create: { name: "Owner", email: "owner@bajomart.com", passwordHash: ownerPasswordHash },
   });
 
   await prisma.user.upsert({
     where: { email: "partner@bajomart.com" },
     update: {},
-    create: {
-      name: "Partner",
-      email: "partner@bajomart.com",
-      passwordHash: partnerPasswordHash,
-    },
+    create: { name: "Partner", email: "partner@bajomart.com", passwordHash: partnerPasswordHash },
   });
 
   console.log("Users seeded. Change these placeholder emails/passwords from the Settings page after logging in.");
-
-  // ── 2. Vendors — CONFIRMED list, 14 per group ────────────────
 
   const operating = [
     "ADIL", "ALL LICENCE FEE", "APPLECARD GS BANK", "CINTAS", "COMCAST",

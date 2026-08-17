@@ -10,9 +10,6 @@ export interface UpdateProfileResult {
   error?: string;
 }
 
-// Lets a logged-in user change their OWN name/email and password.
-// Nobody can change someone else's password — this action always operates
-// on the currently logged-in user's own account only.
 export async function updateOwnProfile(formData: {
   name: string;
   email: string;

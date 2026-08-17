@@ -9,8 +9,8 @@
     "lint": "next lint",
     "test": "vitest run",
     "db:migrate": "prisma migrate dev",
-   "db:seed": "tsx --env-file=.env prisma/seed.ts",
-    "reset-password": "tsx scripts/reset-password.ts"
+    "db:seed": "tsx --env-file=.env prisma/seed.ts",
+    "reset-password": "tsx --env-file=.env scripts/reset-password.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
@@ -39,6 +39,6 @@
     "vitest": "^2.0.3"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx --env-file=.env prisma/seed.ts"
   }
 }

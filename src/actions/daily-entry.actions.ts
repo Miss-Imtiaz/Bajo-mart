@@ -60,6 +60,22 @@ export interface SaveResult {
   error?: string;
 }
 
+// The plain numeric fields tracked in the audit trail (excludes id/dates/relations).
+function snapshotFields(entry: Record<string, unknown>) {
+  const keys = [
+    "mopSale", "eft", "gasSale", "gasInvoice", "posFee", "creCarFee", "totalCard", "stBalDiff",
+    "lottoTotal", "lottoTicketSold", "lottoCashActivation", "lottoCommission", "lottoRent",
+    "payCreditCard", "payDebitCard", "payMobil", "payEbtCash", "payCashInHand", "payFs",
+    "storeSale", "storeTax", "storeCigTaxPaid", "storeCDeposit", "storeEDeposit", "storeTDeposit",
+  ];
+  const snapshot: Record<string, string> = {};
+  for (const key of keys) {
+    const value = entry[key];
+    snapshot[key] = value === null || value === undefined ? "0" : String(value);
+  }
+  return snapshot;
+}
+
 export async function saveDailyEntry(data: DailyEntryFormData): Promise<SaveResult> {
   const session = await getServerSession(authOptions);
   if (!session?.user) return { success: false, error: "You must be logged in." };
@@ -90,72 +106,49 @@ export async function saveDailyEntry(data: DailyEntryFormData): Promise<SaveResu
     })),
   });
 
+  // Fetch the existing row (if any) BEFORE the transaction so we can record
+  // an accurate before/after snapshot in the audit trail (Security Doc Section 2:
+  // every edit to a past entry is logged with who, when, and what changed).
+  const existingEntry = await prisma.dailyEntry.findUnique({ where: { entryDate: date } });
+  const oldValues = existingEntry ? snapshotFields(existingEntry as unknown as Record<string, unknown>) : null;
+
+  const newValuesInput = {
+    mopSale: d(data.mopSale).toNumber(),
+    eft: d(data.eft).toNumber(),
+    gasSale: d(data.gasSale).toNumber(),
+    gasInvoice: d(data.gasInvoice).toNumber(),
+    posFee: d(data.posFee).toNumber(),
+    creCarFee: d(data.creCarFee).toNumber(),
+    totalCard: d(data.totalCard).toNumber(),
+    stBalDiff: d(data.stBalDiff).toNumber(),
+    lottoTotal: d(data.lottoTotal).toNumber(),
+    lottoTicketSold: d(data.lottoTicketSold).toNumber(),
+    lottoCashActivation: d(data.lottoCashActivation).toNumber(),
+    lottoCommission: d(data.lottoCommission).toNumber(),
+    lottoRent: d(data.lottoRent).toNumber(),
+    payCreditCard: d(data.payCreditCard).toNumber(),
+    payDebitCard: d(data.payDebitCard).toNumber(),
+    payMobil: d(data.payMobil).toNumber(),
+    payEbtCash: d(data.payEbtCash).toNumber(),
+    payCashInHand: d(data.payCashInHand).toNumber(),
+    payFs: d(data.payFs).toNumber(),
+    storeSale: d(data.storeSale).toNumber(),
+    storeTax: d(data.storeTax).toNumber(),
+    storeCigTaxPaid: d(data.storeCigTaxPaid).toNumber(),
+    storeCDeposit: d(data.storeCDeposit).toNumber(),
+    storeEDeposit: d(data.storeEDeposit).toNumber(),
+    storeTDeposit: d(data.storeTDeposit).toNumber(),
+    totalBankExpense: calc.totalBankExpense.toNumber(),
+    totalCashExpense: calc.totalCashExpense.toNumber(),
+    totalExpense: calc.totalExpense.toNumber(),
+  };
+
   try {
     await prisma.$transaction(async (tx) => {
       const entry = await tx.dailyEntry.upsert({
         where: { entryDate: date },
-        create: {
-          entryDate: date,
-          mopSale: d(data.mopSale).toNumber(),
-          eft: d(data.eft).toNumber(),
-          gasSale: d(data.gasSale).toNumber(),
-          gasInvoice: d(data.gasInvoice).toNumber(),
-          posFee: d(data.posFee).toNumber(),
-          creCarFee: d(data.creCarFee).toNumber(),
-          totalCard: d(data.totalCard).toNumber(),
-          stBalDiff: d(data.stBalDiff).toNumber(),
-          lottoTotal: d(data.lottoTotal).toNumber(),
-          lottoTicketSold: d(data.lottoTicketSold).toNumber(),
-          lottoCashActivation: d(data.lottoCashActivation).toNumber(),
-          lottoCommission: d(data.lottoCommission).toNumber(),
-          lottoRent: d(data.lottoRent).toNumber(),
-          payCreditCard: d(data.payCreditCard).toNumber(),
-          payDebitCard: d(data.payDebitCard).toNumber(),
-          payMobil: d(data.payMobil).toNumber(),
-          payEbtCash: d(data.payEbtCash).toNumber(),
-          payCashInHand: d(data.payCashInHand).toNumber(),
-          payFs: d(data.payFs).toNumber(),
-          storeSale: d(data.storeSale).toNumber(),
-          storeTax: d(data.storeTax).toNumber(),
-          storeCigTaxPaid: d(data.storeCigTaxPaid).toNumber(),
-          storeCDeposit: d(data.storeCDeposit).toNumber(),
-          storeEDeposit: d(data.storeEDeposit).toNumber(),
-          storeTDeposit: d(data.storeTDeposit).toNumber(),
-          totalBankExpense: calc.totalBankExpense.toNumber(),
-          totalCashExpense: calc.totalCashExpense.toNumber(),
-          totalExpense: calc.totalExpense.toNumber(),
-          createdById: userId,
-        },
-        update: {
-          mopSale: d(data.mopSale).toNumber(),
-          eft: d(data.eft).toNumber(),
-          gasSale: d(data.gasSale).toNumber(),
-          gasInvoice: d(data.gasInvoice).toNumber(),
-          posFee: d(data.posFee).toNumber(),
-          creCarFee: d(data.creCarFee).toNumber(),
-          totalCard: d(data.totalCard).toNumber(),
-          stBalDiff: d(data.stBalDiff).toNumber(),
-          lottoTotal: d(data.lottoTotal).toNumber(),
-          lottoTicketSold: d(data.lottoTicketSold).toNumber(),
-          lottoCashActivation: d(data.lottoCashActivation).toNumber(),
-          lottoCommission: d(data.lottoCommission).toNumber(),
-          lottoRent: d(data.lottoRent).toNumber(),
-          payCreditCard: d(data.payCreditCard).toNumber(),
-          payDebitCard: d(data.payDebitCard).toNumber(),
-          payMobil: d(data.payMobil).toNumber(),
-          payEbtCash: d(data.payEbtCash).toNumber(),
-          payCashInHand: d(data.payCashInHand).toNumber(),
-          payFs: d(data.payFs).toNumber(),
-          storeSale: d(data.storeSale).toNumber(),
-          storeTax: d(data.storeTax).toNumber(),
-          storeCigTaxPaid: d(data.storeCigTaxPaid).toNumber(),
-          storeCDeposit: d(data.storeCDeposit).toNumber(),
-          storeEDeposit: d(data.storeEDeposit).toNumber(),
-          storeTDeposit: d(data.storeTDeposit).toNumber(),
-          totalBankExpense: calc.totalBankExpense.toNumber(),
-          totalCashExpense: calc.totalCashExpense.toNumber(),
-          totalExpense: calc.totalExpense.toNumber(),
-        },
+        create: { entryDate: date, ...newValuesInput, createdById: userId },
+        update: newValuesInput,
       });
 
       // Replace gallons for this day
@@ -186,6 +179,20 @@ export async function saveDailyEntry(data: DailyEntryFormData): Promise<SaveResu
           });
         }
       }
+
+      // Audit trail — records who changed what, and when, for this day.
+      await tx.auditLog.create({
+        data: {
+          tableName: "daily_entries",
+          recordId: entry.id,
+          action: existingEntry ? "UPDATE" : "CREATE",
+          changedById: userId,
+          oldValues: oldValues ?? undefined,
+          newValues: Object.fromEntries(
+            Object.entries(newValuesInput).map(([k, v]) => [k, String(v)])
+          ),
+        },
+      });
     });
   } catch (e) {
     console.error(e);
