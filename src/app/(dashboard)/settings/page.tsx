@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { updateOwnProfile } from "@/actions/user.actions";
 
 export default function SettingsPage() {
@@ -52,7 +53,7 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-4">
       <Card title="Your Account">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <form id="settings-form" onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <label htmlFor="name" className="text-sm text-ink-700">
               Name
@@ -86,63 +87,51 @@ export default function SettingsPage() {
             To change your password, fill in a new one below. Leave blank to keep your current password.
           </p>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="newPassword" className="text-sm text-ink-700">
-              New Password (optional)
-            </label>
-            <input
-              id="newPassword"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              autoComplete="new-password"
-              className="rounded border border-line-200 bg-paper-0 px-3 py-3 text-base outline-none focus:border-2 focus:border-petrol-600"
-            />
-          </div>
+          <PasswordInput
+            label="New Password"
+            hint="(optional)"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            autoComplete="new-password"
+          />
 
           {newPassword && (
-            <div className="flex flex-col gap-1">
-              <label htmlFor="confirmPassword" className="text-sm text-ink-700">
-                Confirm New Password
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                autoComplete="new-password"
-                className="rounded border border-line-200 bg-paper-0 px-3 py-3 text-base outline-none focus:border-2 focus:border-petrol-600"
-              />
-            </div>
+            <PasswordInput
+              label="Confirm New Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+            />
           )}
 
           <hr className="border-line-200" />
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="currentPassword" className="text-sm text-ink-700">
-              Current Password <span className="text-ink-400">(required to save any change)</span>
-            </label>
-            <input
-              id="currentPassword"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              className="rounded border border-line-200 bg-paper-0 px-3 py-3 text-base outline-none focus:border-2 focus:border-petrol-600"
-            />
-          </div>
+          <PasswordInput
+            label="Current Password"
+            hint="(required to save any change)"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+          />
 
           {error && <p className="text-xs text-danger-600">{error}</p>}
           {success && (
             <p className="rounded bg-confirm-100 px-3 py-2 text-sm text-confirm-600">Saved successfully.</p>
           )}
-
-          <Button type="submit" disabled={loading} className="mt-2">
-            {loading ? "Saving..." : "Save Changes"}
-          </Button>
         </form>
       </Card>
+
+      <div className="sticky bottom-0 -mx-4 border-t border-line-200 bg-paper-0 px-4 py-4">
+        <Button
+          type="submit"
+          form="settings-form"
+          disabled={loading}
+          className="w-full tablet:w-auto"
+        >
+          {loading ? "Saving..." : "Save Changes"}
+        </Button>
+      </div>
     </div>
   );
 }
