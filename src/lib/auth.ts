@@ -10,13 +10,8 @@ const WINDOW_MS = 10 * 60 * 1000;
 const LOCKOUT_MS = 15 * 60 * 1000;
 
 export const authOptions: NextAuthOptions = {
-  session: {
-    strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60,
-  },
-  pages: {
-    signIn: "/login",
-  },
+  session: { strategy: "jwt", maxAge: 7 * 24 * 60 * 60 },
+  pages: { signIn: "/login" },
   providers: [
     CredentialsProvider({
       name: "credentials",

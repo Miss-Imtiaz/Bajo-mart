@@ -6,9 +6,9 @@ import { todayDateString, parseDateOnly } from "@/lib/dates";
 import { getMonthlyReport } from "@/actions/report.actions";
 
 const GROUP_COLORS: Record<string, string> = {
-  OPERATING: "#1E4258", // petrol-600
-  WHOLESALE: "#D98E2C", // amber-500
-  SNACKS_BEVERAGE: "#2E7D5B", // confirm-600
+  OPERATING: "#1E4258",
+  WHOLESALE: "#D98E2C",
+  SNACKS_BEVERAGE: "#2E7D5B",
 };
 
 const GROUP_LABELS: Record<string, string> = {
@@ -26,7 +26,6 @@ export default async function DashboardHome() {
     getMonthlyReport(now.getFullYear(), now.getMonth() + 1),
   ]);
 
-  // Group this month's vendor expenses by category for the chart + breakdown cards
   const groupTotals: Record<string, number> = { OPERATING: 0, WHOLESALE: 0, SNACKS_BEVERAGE: 0 };
   for (const row of monthlyReport.vendorRows) {
     groupTotals[row.group] = (groupTotals[row.group] ?? 0) + Number(row.total.toString());
@@ -44,7 +43,7 @@ export default async function DashboardHome() {
     <div className="flex flex-col gap-4">
       <Card title="Today">
         {todaysEntry ? (
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 tablet:flex-row tablet:items-center tablet:justify-between">
             <p className="text-ink-700">
               Today's entry is saved. Total Expense:{" "}
               <span className="font-mono text-ink-900">${todaysEntry.totalExpense.toString()}</span>
@@ -54,7 +53,7 @@ export default async function DashboardHome() {
             </a>
           </div>
         ) : (
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 tablet:flex-row tablet:items-center tablet:justify-between">
             <p className="text-ink-700">No entry for today yet.</p>
             <a href={`/daily-entry/${todayStr}`}>
               <Button>Start Today's Entry</Button>
@@ -76,7 +75,7 @@ export default async function DashboardHome() {
         {monthlyReport.vendorRows.length === 0 ? (
           <p className="text-sm text-ink-400">No vendor expenses recorded yet this month.</p>
         ) : (
-          <DonutChart segments={chartSegments} size={120} />
+          <DonutChart segments={chartSegments} size={130} />
         )}
       </Card>
     </div>
@@ -87,7 +86,7 @@ function StatItem({ label, value, emphasize }: { label: string; value: string; e
   return (
     <div className="flex flex-col gap-1">
       <span className="text-sm text-ink-700">{label}</span>
-      <span className={`font-mono ${emphasize ? "text-xl" : "text-lg"} text-ink-900`}>${value}</span>
+      <span className={`font-mono ${emphasize ? "text-xl" : "text-lg"} text-ink-900 break-all`}>${value}</span>
     </div>
   );
 }

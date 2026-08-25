@@ -27,12 +27,12 @@ export default async function MonthlyReportPage({
   const nextYear = month === 12 ? year + 1 : year;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-ink-900">
           {MONTH_NAMES[month - 1]} {year}
         </h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <a
             href={`/reports/monthly/${prevYear}/${prevMonth}`}
             className="rounded border border-line-200 bg-paper-0 px-3 py-2 text-sm text-ink-700"

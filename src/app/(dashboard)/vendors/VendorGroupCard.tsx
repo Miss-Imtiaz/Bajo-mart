@@ -60,7 +60,7 @@ export function VendorGroupCard({
       <ul className="flex flex-col divide-y divide-line-200">
         {vendors.map((vendor) => (
           <li key={vendor.id} className="flex flex-col gap-2 py-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               {editingId === vendor.id ? (
                 <input
                   autoFocus
@@ -68,7 +68,7 @@ export function VendorGroupCard({
                   onChange={(e) => setEditingName(e.target.value)}
                   onBlur={() => handleRename(vendor.id)}
                   onKeyDown={(e) => e.key === "Enter" && handleRename(vendor.id)}
-                  className="rounded border border-line-200 px-2 py-1 text-sm outline-none focus:border-2 focus:border-petrol-600"
+                  className="min-w-0 flex-1 rounded border border-line-200 px-2 py-1 text-sm outline-none focus:border-2 focus:border-petrol-600"
                 />
               ) : (
                 <span className={vendor.isActive ? "text-ink-900" : "text-ink-400 line-through"}>
@@ -76,7 +76,7 @@ export function VendorGroupCard({
                 </span>
               )}
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {editingId !== vendor.id && (
                   <Button
                     variant="secondary"
@@ -110,7 +110,7 @@ export function VendorGroupCard({
             </div>
 
             {confirmDeleteId === vendor.id && (
-              <div className="flex items-center justify-between rounded bg-danger-100 px-3 py-2">
+              <div className="flex flex-col gap-2 rounded bg-danger-100 px-3 py-2 tablet:flex-row tablet:items-center tablet:justify-between">
                 <span className="text-sm text-danger-600">
                   Permanently delete "{vendor.name}"? This can't be undone.
                 </span>
@@ -136,12 +136,12 @@ export function VendorGroupCard({
         ))}
       </ul>
 
-      <form onSubmit={handleAdd} className="mt-4 flex gap-2">
+      <form onSubmit={handleAdd} className="mt-4 flex flex-col gap-2 tablet:flex-row">
         <input
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="New vendor name"
-          className="flex-1 rounded border border-line-200 px-3 py-2 text-sm outline-none focus:border-2 focus:border-petrol-600"
+          className="min-w-0 flex-1 rounded border border-line-200 px-3 py-2 text-sm outline-none focus:border-2 focus:border-petrol-600"
         />
         <Button type="submit" disabled={loading} className="px-4 py-2 text-sm">
           Add

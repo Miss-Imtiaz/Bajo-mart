@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -18,6 +18,12 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+    useEffect(() => {
+    if (session?.user) {
+      setName(session.user.name ?? "");
+      setEmail(session.user.email ?? "");
+    }
+  }, [session]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -123,12 +129,7 @@ export default function SettingsPage() {
       </Card>
 
       <div className="sticky bottom-0 -mx-4 border-t border-line-200 bg-paper-0 px-4 py-4">
-        <Button
-          type="submit"
-          form="settings-form"
-          disabled={loading}
-          className="w-full tablet:w-auto"
-        >
+        <Button type="submit" form="settings-form" disabled={loading} className="w-full tablet:w-auto">
           {loading ? "Saving..." : "Save Changes"}
         </Button>
       </div>

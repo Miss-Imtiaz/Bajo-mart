@@ -10,15 +10,15 @@ import { parseDateOnly } from "@/lib/dates";
 import { FuelType } from "@prisma/client";
 
 export interface DailyEntryFormData {
-  entryDate: string; // "YYYY-MM-DD"
+  entryDate: string;
   mopSale: string;
   eft: string;
   gasSale: string;
   gasInvoice: string;
   posFee: string;
   creCarFee: string;
-  totalCard: string; // confirmed MANUAL entry — never calculated
-  stBalDiff: string; // confirmed MANUAL entry — never calculated
+  totalCard: string;
+  stBalDiff: string;
   gallons: { REGULAR: string; PLUS: string; PREMIUM: string; DIESEL: string };
   lottoTotal: string;
   lottoTicketSold: string;
@@ -46,12 +46,10 @@ function d(value: string): Decimal {
 
 export async function getDailyEntry(dateStr: string) {
   const date = parseDateOnly(dateStr);
-
   const entry = await prisma.dailyEntry.findUnique({
     where: { entryDate: date },
     include: { fuelGallons: true, expenses: true },
   });
-
   return entry;
 }
 
@@ -60,7 +58,6 @@ export interface SaveResult {
   error?: string;
 }
 
-// The plain numeric fields tracked in the audit trail (excludes id/dates/relations).
 function snapshotFields(entry: Record<string, unknown>) {
   const keys = [
     "mopSale", "eft", "gasSale", "gasInvoice", "posFee", "creCarFee", "totalCard", "stBalDiff",
@@ -83,16 +80,12 @@ export async function saveDailyEntry(data: DailyEntryFormData): Promise<SaveResu
   const userId = (session.user as any).id as string;
   const date = parseDateOnly(data.entryDate);
 
-  // Validate: every expense with an amount > 0 needs to make sense (server-side
-  // validation — never trust the frontend alone).
   for (const row of data.expenses) {
     if (d(row.bankAmount).lessThan(0) || d(row.cashAmount).lessThan(0)) {
       return { success: false, error: "Expense amounts cannot be negative." };
     }
   }
 
-  // TOTAL CARD and ST/BAL DIFF are confirmed MANUAL entries (daily-report-formulas.md) —
-  // they come straight from the form, never calculated here.
   const calc = calculateDailyEntry({
     gallons: {
       regular: d(data.gallons.REGULAR),
@@ -106,9 +99,6 @@ export async function saveDailyEntry(data: DailyEntryFormData): Promise<SaveResu
     })),
   });
 
-  // Fetch the existing row (if any) BEFORE the transaction so we can record
-  // an accurate before/after snapshot in the audit trail (Security Doc Section 2:
-  // every edit to a past entry is logged with who, when, and what changed).
   const existingEntry = await prisma.dailyEntry.findUnique({ where: { entryDate: date } });
   const oldValues = existingEntry ? snapshotFields(existingEntry as unknown as Record<string, unknown>) : null;
 
@@ -151,7 +141,6 @@ export async function saveDailyEntry(data: DailyEntryFormData): Promise<SaveResu
         update: newValuesInput,
       });
 
-      // Replace gallons for this day
       await tx.gasGallons.deleteMany({ where: { dailyEntryId: entry.id } });
       const fuelTypes: FuelType[] = ["REGULAR", "PLUS", "PREMIUM", "DIESEL"];
       for (const fuelType of fuelTypes) {
@@ -163,7 +152,6 @@ export async function saveDailyEntry(data: DailyEntryFormData): Promise<SaveResu
         }
       }
 
-      // Replace expenses for this day
       await tx.dailyExpense.deleteMany({ where: { dailyEntryId: entry.id } });
       for (const row of data.expenses) {
         const bank = d(row.bankAmount);
@@ -180,7 +168,6 @@ export async function saveDailyEntry(data: DailyEntryFormData): Promise<SaveResu
         }
       }
 
-      // Audit trail — records who changed what, and when, for this day.
       await tx.auditLog.create({
         data: {
           tableName: "daily_entries",

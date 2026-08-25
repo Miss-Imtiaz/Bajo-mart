@@ -7,10 +7,7 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-export async function GET(
-  _req: Request,
-  { params }: { params: { year: string; month: string } }
-) {
+export async function GET(_req: Request, { params }: { params: { year: string; month: string } }) {
   const year = parseInt(params.year, 10);
   const month = parseInt(params.month, 10);
 

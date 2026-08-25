@@ -12,7 +12,7 @@ const links = [
   { href: "/settings", label: "Settings" },
 ];
 
-export function NavLinks() {
+export function NavLinks({ onNavigate }: { onNavigate?: () => void } = {}) {
   const pathname = usePathname();
 
   return links.map((link) => {
@@ -22,6 +22,7 @@ export function NavLinks() {
       {
         key: link.href,
         href: link.href,
+        onClick: onNavigate,
         className: isActive ? "font-semibold text-ink-900" : "text-ink-700 hover:text-ink-900",
       },
       link.label

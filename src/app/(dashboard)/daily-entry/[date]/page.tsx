@@ -14,9 +14,8 @@ export default async function DailyEntryPage({ params }: { params: { date: strin
   const history = entry ? await getDailyEntryAuditHistory(entry.id) : [];
 
   return (
-    
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-ink-900">Daily Entry — {params.date}</h1>
         <a href="/daily-entry" className="text-sm text-petrol-600">
           Change Date

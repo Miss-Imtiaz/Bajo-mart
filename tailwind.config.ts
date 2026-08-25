@@ -17,9 +17,7 @@ const config: Config = {
         sans: ["Inter", "system-ui", "sans-serif"],
         mono: ["IBM Plex Mono", "ui-monospace", "monospace"],
       },
-      fontSize: {
-        xs: "12px", sm: "14px", base: "16px", lg: "18px", xl: "22px", "2xl": "28px",
-      },
+      fontSize: { xs: "12px", sm: "14px", base: "16px", lg: "18px", xl: "22px", "2xl": "28px" },
       spacing: { 1: "4px", 2: "8px", 3: "12px", 4: "16px", 6: "24px", 8: "32px", 12: "48px" },
       borderRadius: { DEFAULT: "8px", card: "12px" },
       screens: { tablet: "640px", desktop: "1024px" },

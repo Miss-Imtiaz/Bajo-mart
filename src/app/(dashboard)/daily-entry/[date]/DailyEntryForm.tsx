@@ -18,31 +18,12 @@ type VendorGroups = {
 type Suggestions = Record<string, { bank: string[]; cash: string[] }>;
 
 type ExistingEntry = {
-  mopSale: unknown;
-  eft: unknown;
-  gasSale: unknown;
-  gasInvoice: unknown;
-  posFee: unknown;
-  creCarFee: unknown;
-  totalCard: unknown;
-  stBalDiff: unknown;
-  lottoTotal: unknown;
-  lottoTicketSold: unknown;
-  lottoCashActivation: unknown;
-  lottoCommission: unknown;
-  lottoRent: unknown;
-  payCreditCard: unknown;
-  payDebitCard: unknown;
-  payMobil: unknown;
-  payEbtCash: unknown;
-  payCashInHand: unknown;
-  payFs: unknown;
-  storeSale: unknown;
-  storeTax: unknown;
-  storeCigTaxPaid: unknown;
-  storeCDeposit: unknown;
-  storeEDeposit: unknown;
-  storeTDeposit: unknown;
+  mopSale: unknown; eft: unknown; gasSale: unknown; gasInvoice: unknown; posFee: unknown;
+  creCarFee: unknown; totalCard: unknown; stBalDiff: unknown; lottoTotal: unknown;
+  lottoTicketSold: unknown; lottoCashActivation: unknown; lottoCommission: unknown; lottoRent: unknown;
+  payCreditCard: unknown; payDebitCard: unknown; payMobil: unknown; payEbtCash: unknown;
+  payCashInHand: unknown; payFs: unknown; storeSale: unknown; storeTax: unknown;
+  storeCigTaxPaid: unknown; storeCDeposit: unknown; storeEDeposit: unknown; storeTDeposit: unknown;
   fuelGallons: { fuelType: string; gallons: unknown }[];
   expenses: { vendorId: string; bankAmount: unknown; cashAmount: unknown }[];
 } | null;
@@ -61,9 +42,6 @@ const emptyFields = {
 
 const emptyGallons = { REGULAR: "", PLUS: "", PREMIUM: "", DIESEL: "" };
 
-// A small toast fixed to the top of the screen — visible immediately without
-// scrolling, regardless of how long the form is. Auto-dismisses after a few
-// seconds so it never blocks the UI.
 function Toast({ message, variant, onDismiss }: { message: string; variant: "success" | "error"; onDismiss: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onDismiss, 4000);
@@ -80,15 +58,9 @@ function Toast({ message, variant, onDismiss }: { message: string; variant: "suc
 }
 
 export function DailyEntryForm({
-  date,
-  existingEntry,
-  vendorGroups,
-  suggestions,
+  date, existingEntry, vendorGroups, suggestions,
 }: {
-  date: string;
-  existingEntry: ExistingEntry;
-  vendorGroups: VendorGroups;
-  suggestions: Suggestions;
+  date: string; existingEntry: ExistingEntry; vendorGroups: VendorGroups; suggestions: Suggestions;
 }) {
   const buildFieldsFromEntry = (entry: ExistingEntry) => {
     if (!entry) return emptyFields;
@@ -112,14 +84,8 @@ export function DailyEntryForm({
   const [fields, setFields] = useState(() => buildFieldsFromEntry(existingEntry));
 
   const [gallons, setGallons] = useState(() => {
-    const find = (type: string) =>
-      s(existingEntry?.fuelGallons.find((g) => g.fuelType === type)?.gallons);
-    return {
-      REGULAR: find("REGULAR"),
-      PLUS: find("PLUS"),
-      PREMIUM: find("PREMIUM"),
-      DIESEL: find("DIESEL"),
-    };
+    const find = (type: string) => s(existingEntry?.fuelGallons.find((g) => g.fuelType === type)?.gallons);
+    return { REGULAR: find("REGULAR"), PLUS: find("PLUS"), PREMIUM: find("PREMIUM"), DIESEL: find("DIESEL") };
   });
 
   const allVendors = [...vendorGroups.OPERATING, ...vendorGroups.WHOLESALE, ...vendorGroups.SNACKS_BEVERAGE];
@@ -143,32 +109,21 @@ export function DailyEntryForm({
   function setField(key: keyof typeof fields, value: string) {
     setFields((f) => ({ ...f, [key]: value }));
   }
-
   function setGallon(type: keyof typeof gallons, value: string) {
     setGallons((g) => ({ ...g, [type]: value }));
   }
-
   function setExpense(vendorId: string, kind: "bank" | "cash", value: string) {
     setExpenses((e) => ({ ...e, [vendorId]: { ...e[vendorId], [kind]: value } }));
   }
 
-  // Live totals — uses the exact same calculation engine the server uses,
-  // so what you see while typing matches what gets saved. Note: Total Card
-  // and ST/Bal Diff are confirmed MANUAL entries (daily-report-formulas.md)
-  // and are never calculated — they're just regular typed fields below.
   const liveCalc = useMemo(() => {
     const d = (v: string) => new Decimal(v || 0);
     return calculateDailyEntry({
       gallons: {
-        regular: d(gallons.REGULAR),
-        plus: d(gallons.PLUS),
-        premium: d(gallons.PREMIUM),
-        diesel: d(gallons.DIESEL),
+        regular: d(gallons.REGULAR), plus: d(gallons.PLUS),
+        premium: d(gallons.PREMIUM), diesel: d(gallons.DIESEL),
       },
-      expenseRows: Object.values(expenses).map((e) => ({
-        bankAmount: d(e.bank),
-        cashAmount: d(e.cash),
-      })),
+      expenseRows: Object.values(expenses).map((e) => ({ bankAmount: d(e.bank), cashAmount: d(e.cash) })),
     });
   }, [gallons, expenses]);
 
@@ -196,19 +151,17 @@ export function DailyEntryForm({
     }
 
     setToast({ message: "Saved successfully.", variant: "success" });
-    // Clear the form so it's ready for fresh entry — reopening this date
-    // later will still load exactly what was just saved.
     setFields(emptyFields);
     setGallons(emptyGallons);
     setExpenses(buildExpensesFromEntry(null));
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-24">
+    <div className="flex flex-col gap-4 pb-24">
       {toast && <Toast message={toast.message} variant={toast.variant} onDismiss={() => setToast(null)} />}
 
       <Card title="Gas Gallons">
-        <div className="grid grid-cols-2 gap-4 tablet:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 tablet:grid-cols-4">
           {(["REGULAR", "PLUS", "PREMIUM", "DIESEL"] as const).map((type) => (
             <MoneyInput
               key={type}
@@ -224,7 +177,7 @@ export function DailyEntryForm({
       </Card>
 
       <Card title="Sale & Purchase">
-        <div className="grid grid-cols-2 gap-4 tablet:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 tablet:grid-cols-3">
           <MoneyInput label="Gas Sale" value={fields.gasSale} onChange={(e) => setField("gasSale", e.target.value)} />
           <MoneyInput label="Gas Invoice" value={fields.gasInvoice} onChange={(e) => setField("gasInvoice", e.target.value)} />
           <MoneyInput label="POS Fee" value={fields.posFee} onChange={(e) => setField("posFee", e.target.value)} />
@@ -235,7 +188,7 @@ export function DailyEntryForm({
       </Card>
 
       <Card title="Lotto">
-        <div className="grid grid-cols-2 gap-4 tablet:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 tablet:grid-cols-3">
           <MoneyInput label="Total" value={fields.lottoTotal} onChange={(e) => setField("lottoTotal", e.target.value)} />
           <MoneyInput label="Ticket Sold" value={fields.lottoTicketSold} onChange={(e) => setField("lottoTicketSold", e.target.value)} />
           <MoneyInput label="Cash Activation" value={fields.lottoCashActivation} onChange={(e) => setField("lottoCashActivation", e.target.value)} />
@@ -245,7 +198,7 @@ export function DailyEntryForm({
       </Card>
 
       <Card title="Payment">
-        <div className="grid grid-cols-2 gap-4 tablet:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 tablet:grid-cols-3">
           <MoneyInput label="Credit Card" value={fields.payCreditCard} onChange={(e) => setField("payCreditCard", e.target.value)} />
           <MoneyInput label="Debit Card" value={fields.payDebitCard} onChange={(e) => setField("payDebitCard", e.target.value)} />
           <MoneyInput label="Mobil" value={fields.payMobil} onChange={(e) => setField("payMobil", e.target.value)} />
@@ -258,7 +211,7 @@ export function DailyEntryForm({
       </Card>
 
       <Card title="Store">
-        <div className="grid grid-cols-2 gap-4 tablet:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 tablet:grid-cols-3">
           <MoneyInput label="Store Sale" value={fields.storeSale} onChange={(e) => setField("storeSale", e.target.value)} />
           <MoneyInput label="Tax" value={fields.storeTax} onChange={(e) => setField("storeTax", e.target.value)} />
           <MoneyInput label="Cig Tax Paid" value={fields.storeCigTaxPaid} onChange={(e) => setField("storeCigTaxPaid", e.target.value)} />
@@ -280,32 +233,33 @@ export function DailyEntryForm({
                 const bankListId = `suggest-bank-${vendor.id}`;
                 const cashListId = `suggest-cash-${vendor.id}`;
                 return (
-                  <div key={vendor.id} className="grid grid-cols-3 items-center gap-2 py-2 tablet:grid-cols-[1fr_140px_140px]">
+                  <div
+                    key={vendor.id}
+                    className="flex flex-col gap-2 py-2 tablet:grid tablet:grid-cols-[1fr_140px_140px] tablet:items-center tablet:gap-2"
+                  >
                     <span className="text-sm text-ink-900">{vendor.name}</span>
-                    <MoneyInput
-                      label="Bank"
-                      value={expenses[vendor.id]?.bank ?? ""}
-                      onChange={(e) => setExpense(vendor.id, "bank", e.target.value)}
-                      list={bankListId}
-                    />
-                    <MoneyInput
-                      label="Cash"
-                      value={expenses[vendor.id]?.cash ?? ""}
-                      onChange={(e) => setExpense(vendor.id, "cash", e.target.value)}
-                      list={cashListId}
-                    />
+                    <div className="grid grid-cols-2 gap-2 tablet:contents">
+                      <MoneyInput
+                        label="Bank"
+                        value={expenses[vendor.id]?.bank ?? ""}
+                        onChange={(e) => setExpense(vendor.id, "bank", e.target.value)}
+                        list={bankListId}
+                      />
+                      <MoneyInput
+                        label="Cash"
+                        value={expenses[vendor.id]?.cash ?? ""}
+                        onChange={(e) => setExpense(vendor.id, "cash", e.target.value)}
+                        list={cashListId}
+                      />
+                    </div>
                     {vendorSuggestions?.bank.length ? (
                       <datalist id={bankListId}>
-                        {vendorSuggestions.bank.map((amt) => (
-                          <option key={amt} value={amt} />
-                        ))}
+                        {vendorSuggestions.bank.map((amt) => <option key={amt} value={amt} />)}
                       </datalist>
                     ) : null}
                     {vendorSuggestions?.cash.length ? (
                       <datalist id={cashListId}>
-                        {vendorSuggestions.cash.map((amt) => (
-                          <option key={amt} value={amt} />
-                        ))}
+                        {vendorSuggestions.cash.map((amt) => <option key={amt} value={amt} />)}
                       </datalist>
                     ) : null}
                   </div>

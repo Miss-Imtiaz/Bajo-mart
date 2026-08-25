@@ -7,7 +7,7 @@ const GROUP_LABELS: Record<string, string> = {
 };
 
 export interface ReportExportData {
-  title: string; // e.g. "April 2026" or "2026 Yearly Report"
+  title: string;
   totals: {
     gasSale: { toString(): string };
     totalCard: { toString(): string };
@@ -38,14 +38,12 @@ export async function buildReportWorkbook(data: ReportExportData): Promise<Excel
   const sheet = workbook.addWorksheet("Report");
   sheet.properties.defaultColWidth = 18;
 
-  // Title
   sheet.mergeCells("A1:E1");
   sheet.getCell("A1").value = `Bajo Mart Inc. — ${data.title}`;
   sheet.getCell("A1").font = { bold: true, size: 16, name: "Arial" };
 
   let row = 3;
 
-  // Section totals
   sheet.getCell(`A${row}`).value = "Section Totals";
   sheet.getCell(`A${row}`).font = { bold: true, size: 13, name: "Arial" };
   row += 1;
@@ -71,12 +69,10 @@ export async function buildReportWorkbook(data: ReportExportData): Promise<Excel
 
   row += 1;
 
-  // Vendor expenses table
   sheet.getCell(`A${row}`).value = "Vendor Expenses";
   sheet.getCell(`A${row}`).font = { bold: true, size: 13, name: "Arial" };
   row += 1;
 
-  const headerRow = row;
   ["Vendor", "Group", "Bank", "Cash", "Total"].forEach((h, i) => {
     const cell = sheet.getCell(row, i + 1);
     cell.value = h;
@@ -100,7 +96,6 @@ export async function buildReportWorkbook(data: ReportExportData): Promise<Excel
 
   row += 1;
 
-  // Summary
   sheet.getCell(`A${row}`).value = "Expense & Net Summary";
   sheet.getCell(`A${row}`).font = { bold: true, size: 13, name: "Arial" };
   row += 1;

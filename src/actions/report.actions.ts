@@ -3,9 +3,8 @@ import { sumDecimals, sumExpensesByVendor } from "@/lib/calculations";
 import Decimal from "decimal.js";
 
 export async function getMonthlyReport(year: number, month: number) {
-  // month is 1-12
   const startDate = new Date(Date.UTC(year, month - 1, 1));
-  const endDate = new Date(Date.UTC(year, month, 1)); // first day of next month (exclusive)
+  const endDate = new Date(Date.UTC(year, month, 1));
 
   const entries = await prisma.dailyEntry.findMany({
     where: { entryDate: { gte: startDate, lt: endDate } },
@@ -43,7 +42,6 @@ export async function getMonthlyReport(year: number, month: number) {
 
   const byVendor = sumExpensesByVendor(allExpenseRows);
 
-  // Attach vendor name/group to each summary row for display
   const vendorRows = Object.entries(byVendor).map(([vendorId, totals]) => {
     const sample = allExpenseRows.find((r) => r.vendorId === vendorId)!;
     return {
@@ -56,13 +54,7 @@ export async function getMonthlyReport(year: number, month: number) {
     };
   });
 
-  return {
-    year,
-    month,
-    daysWithEntries: entries.length,
-    totals,
-    vendorRows,
-  };
+  return { year, month, daysWithEntries: entries.length, totals, vendorRows };
 }
 
 export async function getYearlyReport(year: number) {
@@ -116,7 +108,6 @@ export async function getYearlyReport(year: number) {
     };
   });
 
-  // Month-by-month trend — Net Expense and Store Sale per month, for the chart/table
   const monthlyTrend = Array.from({ length: 12 }, (_, i) => {
     const monthNum = i + 1;
     const monthEntries = entries.filter((e) => e.entryDate.getUTCMonth() + 1 === monthNum);
@@ -128,11 +119,5 @@ export async function getYearlyReport(year: number) {
     };
   });
 
-  return {
-    year,
-    daysWithEntries: entries.length,
-    totals,
-    vendorRows,
-    monthlyTrend,
-  };
+  return { year, daysWithEntries: entries.length, totals, vendorRows, monthlyTrend };
 }

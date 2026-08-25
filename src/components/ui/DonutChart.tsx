@@ -1,12 +1,9 @@
 interface Segment {
   label: string;
   value: number;
-  color: string; // hex or tailwind-resolved hex
+  color: string;
 }
 
-// A dependency-free donut chart built with plain SVG stroke-dasharray math.
-// Keeps the app lightweight (no charting library) while still giving a
-// quick-glance visual for "where is this month's money going".
 export function DonutChart({ segments, size = 160 }: { segments: Segment[]; size?: number }) {
   const total = segments.reduce((sum, s) => sum + s.value, 0);
   const radius = size / 2 - 12;
@@ -16,15 +13,15 @@ export function DonutChart({ segments, size = 160 }: { segments: Segment[]; size
   let cumulativePct = 0;
 
   return (
-    <div className="flex items-center gap-6">
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <div className="flex flex-col items-center gap-4 tablet:flex-row tablet:gap-6">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
         <circle cx={center} cy={center} r={radius} fill="none" stroke="#E4E2DB" strokeWidth={20} />
         {total > 0 &&
           segments.map((seg, i) => {
             const pct = seg.value / total;
             if (pct <= 0) return null;
             const dash = pct * circumference;
-            const offset = circumference - (cumulativePct * circumference);
+            const offset = circumference - cumulativePct * circumference;
             cumulativePct += pct;
             return (
               <circle
@@ -49,7 +46,7 @@ export function DonutChart({ segments, size = 160 }: { segments: Segment[]; size
       <ul className="flex flex-col gap-2">
         {segments.map((seg, i) => (
           <li key={i} className="flex items-center gap-2 text-sm text-ink-700">
-            <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: seg.color }} />
+            <span className="inline-block h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: seg.color }} />
             {seg.label}
             <span className="font-mono text-ink-900">${seg.value.toFixed(2)}</span>
           </li>

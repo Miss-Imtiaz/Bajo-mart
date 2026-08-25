@@ -16,16 +16,13 @@ export default async function YearlyReportPage({ params }: { params: { year: str
   const year = parseInt(params.year, 10);
   const report = await getYearlyReport(year);
 
-  const maxExpense = Math.max(
-    1,
-    ...report.monthlyTrend.map((m) => Number(m.totalExpense.toString()))
-  );
+  const maxExpense = Math.max(1, ...report.monthlyTrend.map((m) => Number(m.totalExpense.toString())));
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-ink-900">{year} — Yearly Report</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <a
             href={`/reports/yearly/${year - 1}`}
             className="rounded border border-line-200 bg-paper-0 px-3 py-2 text-sm text-ink-700"
@@ -72,9 +69,7 @@ export default async function YearlyReportPage({ params }: { params: { year: str
             const heightPct = m.daysWithEntries > 0 ? Math.max(4, (value / maxExpense) * 100) : 0;
             return (
               <div key={m.month} className="flex flex-1 flex-col items-center justify-end gap-1">
-                <span className="text-xs text-ink-700">
-                  {value > 0 ? `$${value.toFixed(0)}` : ""}
-                </span>
+                <span className="text-xs text-ink-700">{value > 0 ? `$${value.toFixed(0)}` : ""}</span>
                 <div
                   className={`w-full rounded-t ${m.daysWithEntries > 0 ? "bg-petrol-600" : "bg-line-200"}`}
                   style={{ height: `${heightPct}%` }}

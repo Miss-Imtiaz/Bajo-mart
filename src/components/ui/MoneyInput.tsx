@@ -25,7 +25,7 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
             type="number"
             step="0.01"
             inputMode="decimal"
-            className={`w-full bg-transparent py-3 pl-1 text-right font-mono text-base outline-none ${className}`}
+            className={`w-full min-w-0 bg-transparent py-3 pl-1 text-right font-mono text-base outline-none ${className}`}
             {...props}
           />
         </div>

@@ -1,92 +1,75 @@
-# Bajo Mart Reporting App — Setup Guide
+# Bajo Mart Reporting App
 
-## Batch 2 additions (this update)
+## What's in this build
 
-- **Vendor Manager** (`/vendors`) — add, rename, deactivate/reactivate vendors in
-  all 3 groups. Deactivating never deletes history.
-- **Daily Entry Form** (`/daily-entry/[date]`, or click "Today's Entry" in the nav)
-  — the full Gas/Lotto/Payment/Store/Expenses form, with live totals calculated
-  the same way they'll be saved. Each of the 42 vendors has a Bank and a Cash
-  amount field. Saving an existing date's entry updates it (safe to re-open and edit).
-- **Monthly Report** (`/reports/monthly`) — auto-aggregates all daily entries in
-  a month: section totals, a per-vendor Bank/Cash breakdown table, and expense
-  summary. Use the Previous/Next buttons to browse other months.
-
-**Not included yet:** Yearly Report, Excel/PDF export, audit log/edit history view.
-
----
+- Full authentication (login, forgot password, settings, logout) with eye-icon
+  password fields throughout
+- Vendor Manager (42 confirmed vendors, add/rename/deactivate/delete)
+- Daily Entry form matching the confirmed real report (see daily-report-formulas.md),
+  with a date picker so past days are easy to reach and edit
+- Monthly Report and Yearly Report, both with Excel and PDF export
+- Dashboard with this month's totals and a category breakdown chart
+- Full audit history — every save records who changed what and when
+- **Mobile responsive** — hamburger menu on phones, active-tab highlighting,
+  sticky nav/summary bars, and forms that stack cleanly on small screens
 
 ## Full setup from scratch
 
-### Step 1 — Install Node.js
-Node 20 LTS from nodejs.org. Confirm: `node -v`
-
-### Step 2 — Install dependencies
+### Step 1 — Install dependencies
 ```
 npm install
 ```
 
-### Step 3 — Environment files
+### Step 2 — Environment files
 ```
 copy .env.example .env.local
 copy .env.local .env
 ```
-Fill in both `.env.local` and `.env` with:
-- `DATABASE_URL` — your Neon **pooled** connection string
-- `DIRECT_DATABASE_URL` — your Neon **direct** (non-pooled) connection string.
-  In the Neon dashboard, uncheck/toggle off "pooled connection" to get this one —
-  it's used only for migrations and is far less likely to drop mid-operation.
-- `NEXTAUTH_SECRET` — generate with `openssl rand -base64 32`, or on Windows:
-  `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
-- `RESEND_API_KEY` — optional. Leave blank and Forgot Password will print the
-  reset link to your terminal instead of emailing it.
+Fill in both files with:
+- `DATABASE_URL` — Neon **pooled** connection string
+- `DIRECT_DATABASE_URL` — Neon **direct** (non-pooled) connection string (used only for migrations)
+- `NEXTAUTH_SECRET` — generate with `openssl rand -base64 32`
+- `RESEND_API_KEY` — optional; leave blank and reset links print to your terminal instead
 
-### Step 4 — Create database tables
+### Step 3 — Database
 ```
 npm run db:migrate
 ```
-Name it `init` if asked. If you see a "drift detected" prompt asking to reset,
-and this is a fresh database with no real data yet, it's safe to answer `y`.
-
-If a reset ever fails partway with a connection error, run this instead — it's
-non-destructive and just brings the database in line with the schema:
+If asked to reset a fresh/empty database, `y` is safe. If a reset ever fails
+partway, use the non-destructive alternative instead:
 ```
 npx prisma db push
 ```
 
-### Step 5 — Seed initial data
+### Step 4 — Seed data
 ```
 npm run db:seed
 ```
 Creates 2 accounts (`owner@bajomart.com` / `partner@bajomart.com`, temporary
-passwords in `prisma/seed.ts`) and all 42 confirmed vendors.
+passwords in `prisma/seed.ts`) and all 42 confirmed vendors. Change both
+placeholder passwords from the Settings page immediately after logging in.
 
-**Change your placeholder email/password from the Settings page** after logging in
-— that's the safest way since it happens while you're already authenticated.
-
-### Step 6 — Run it
+### Step 5 — Run
 ```
 npm run dev
 ```
 Open **http://localhost:3000**.
 
----
-
-## Using the app
-
-1. **Log in**, then click **Settings** to set your real email and password.
-2. **Vendors** — review the 42 seeded vendors; add/rename/deactivate as needed.
-3. **Today's Entry** — fill in the day's numbers. Totals update live as you type.
-   Click **Save Entry**. Re-opening the same date later loads what you saved,
-   so you can correct a mistake any time.
-4. **Reports → Monthly** — see the auto-calculated totals for any month, browse
-   with Previous/Next.
-
-## If someone gets locked out (no email set up)
+## If someone gets locked out
 ```
 npm run reset-password -- --email=their-email@example.com --password=NewPassword123!
 ```
 
-## What's next
-Yearly Report with month-by-month trend, Excel/PDF export, and the audit
-history view. Say the word when you're ready for that batch.
+## Neon free-tier note
+The database auto-suspends after ~5 minutes idle. If you get a "can't reach
+database server" error, open your Neon dashboard once to wake it, then retry.
+Before real daily business use, upgrade to a paid "Always On" Neon plan so
+this never happens for the store staff.
+
+## Deploying to Vercel
+1. Push to GitHub (already done).
+2. Import the repo at vercel.com.
+3. Add the same environment variables from `.env.local` in Vercel's
+   Environment Variables settings, and set `NEXTAUTH_URL` to your real
+   Vercel URL once you have it.
+4. Deploy.

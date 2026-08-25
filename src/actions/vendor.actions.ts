@@ -42,20 +42,12 @@ export async function renameVendor(id: string, name: string) {
   return { success: true };
 }
 
-// Deactivation only — there is deliberately no delete for vendors with
-// history. Past daily_expenses rows referencing this vendor stay intact and
-// still show in historical reports; the vendor just stops appearing on new
-// Daily Entry forms.
 export async function setVendorActive(id: string, isActive: boolean) {
   await prisma.vendor.update({ where: { id }, data: { isActive } });
   revalidatePath("/vendors");
   return { success: true };
 }
 
-// Permanent delete — ONLY allowed if this vendor has never been used in any
-// daily expense record. This protects historical report accuracy while
-// still letting you clean up a vendor added by mistake (e.g. during testing)
-// that has no real data attached to it.
 export async function deleteVendor(id: string) {
   const usageCount = await prisma.dailyExpense.count({ where: { vendorId: id } });
 
@@ -71,9 +63,6 @@ export async function deleteVendor(id: string) {
   return { success: true };
 }
 
-// Returns, per vendor, a short list of amounts that were entered for them
-// before — used to power the type-to-suggest dropdown on the Daily Entry
-// form, so a recurring expense can be picked instead of retyped.
 export async function getVendorAmountSuggestions() {
   const rows = await prisma.dailyExpense.findMany({
     where: {
