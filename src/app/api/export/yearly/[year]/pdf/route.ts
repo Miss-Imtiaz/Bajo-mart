@@ -15,12 +15,12 @@ export async function GET(_req: Request, { params }: { params: { year: string } 
       vendorRows: report.vendorRows,
     });
 
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="Bajo-Mart-Yearly-${year}.pdf"`,
-      },
-    });
+    return new NextResponse(new Uint8Array(buffer), {
+  headers: {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": `attachment; filename="Bajo-Mart-Yearly-${year}.pdf"`,
+  },
+});
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Export failed. Please try again." }, { status: 500 });

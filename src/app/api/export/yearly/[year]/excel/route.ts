@@ -13,7 +13,7 @@ export async function GET(_req: Request, { params }: { params: { year: string } 
       vendorRows: report.vendorRows,
     });
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="Bajo-Mart-Yearly-${year}.xlsx"`,

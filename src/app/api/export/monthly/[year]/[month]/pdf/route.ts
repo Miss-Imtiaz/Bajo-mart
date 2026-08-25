@@ -20,13 +20,13 @@ export async function GET(_req: Request, { params }: { params: { year: string; m
       totals: report.totals,
       vendorRows: report.vendorRows,
     });
-
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="Bajo-Mart-${MONTH_NAMES[month - 1]}-${year}.pdf"`,
-      },
-    });
+return new NextResponse(new Uint8Array(buffer), {
+  headers: {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": `attachment; filename="Bajo-Mart-Yearly-${year}.pdf"`,
+  },
+});
+   
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Export failed. Please try again." }, { status: 500 });
