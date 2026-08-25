@@ -23,7 +23,7 @@ export async function GET(_req: Request, { params }: { params: { year: string; m
 return new NextResponse(new Uint8Array(buffer), {
   headers: {
     "Content-Type": "application/pdf",
-    "Content-Disposition": `attachment; filename="Bajo-Mart-Yearly-${year}.pdf"`,
+    "Content-Disposition": `attachment; filename="Bajo-Mart-${MONTH_NAMES[month - 1]}-${year}.pdf"`,
   },
 });
    
